@@ -136,54 +136,25 @@
   padding: 60px 20px;
 }
 
-.table-container {
+.venue-container {
   max-width: 1000px;
   margin: 0 auto;
-  overflow-x: auto;
 }
 
-.dining-table {
-  width: 100%;
-  border-collapse: collapse;
+.venue-description {
   font-family: 'Lora', serif;
-  background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
+  font-size: clamp(1.1rem, 1.8vw, 1.2rem);
+  color: var(--dark-color);
+  line-height: 1.6;
+  margin-bottom: 20px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
-.dining-table th, .dining-table td {
-  padding: 15px;
-  border: 1px solid #f0e4ea;
-  text-align: center;
-}
-
-.dining-table th {
-  background: var(--primary-color);
-  color: #fff;
-  font-family: 'Montserrat', sans-serif;
-}
-
-.dining-table tr {
-  transition: background 0.3s;
-}
-
-.dining-table tr:hover {
-  background: #f9f1f5;
-}
-
-.dining-table .details-btn {
-  padding: 8px 16px;
-  background: var(--accent-color);
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-family: 'Montserrat', sans-serif;
-  transition: transform 0.2s;
-}
-
-.dining-table .details-btn:hover {
-  transform: scale(1.05);
+.venue-description.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .additional-dining-note {
@@ -191,7 +162,26 @@
   font-size: clamp(1rem, 1.7vw, 1.1rem);
   color: var(--primary-color);
   text-align: center;
-  margin-top: 20px;
+  margin: 20px 0;
+}
+
+.dining-venues-section .details-btn {
+  padding: 8px 16px;
+  background: var(--accent-color);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(1rem, 1.7vw, 1.1rem);
+  transition: transform 0.2s, background 0.3s;
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.dining-venues-section .details-btn:hover {
+  transform: scale(1.05);
+  background: var(--primary-color);
 }
 
 /* Gallery Section */
@@ -543,17 +533,6 @@
   margin-bottom: 20px;
 }
 
-.cta-container .btn-primary {
-  padding: 12px 30px;
-  font-size: 1.1rem;
-  margin: 10px;
-  transition: transform 0.3s;
-}
-
-.cta-container .btn-primary:hover {
-  transform: scale(1.1);
-}
-
 .cta-section a {
   color: #fff;
   text-decoration: none;
@@ -591,11 +570,16 @@
     padding: 40px 15px;
   }
 
-  .dining-table {
-    font-size: 0.9rem;
+  .venue-description {
+    font-size: clamp(1rem, 1.7vw, 1.1rem);
   }
 
   .additional-dining-note {
+    font-size: clamp(0.95rem, 1.6vw, 1rem);
+  }
+
+  .dining-venues-section .details-btn {
+    padding: 7px 14px;
     font-size: clamp(0.95rem, 1.6vw, 1rem);
   }
 
@@ -627,10 +611,5 @@
 
   .gallery-modal-content img {
     max-height: 50vh;
-  }
-
-  .cta-container .btn-primary {
-    padding: 10px 20px;
-    font-size: 1rem;
   }
 }
