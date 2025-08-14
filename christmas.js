@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Constants
     const DEBOUNCE_DELAY = 300;
+    const PRELOADER_TIMEOUT = 5000; // Fallback timeout in ms
 
     // Cached DOM Elements
     const preloader = document.querySelector('.preloader');
@@ -30,36 +31,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Preloader Logic
     const initPreloader = () => {
-      if (sessionStorage.getItem('preloaderShown') !== 'true') {
-        if (preloader) {
-          document.body.classList.add('preloading');
-          document.querySelectorAll('.site-header, .hero-section, section, footer, .back-to-top').forEach((el) => {
-            el.style.display = 'none';
-          });
-
-          let progress = 0;
-          const interval = setInterval(() => {
-            progress += 10;
-            if (progress >= 100) {
-              clearInterval(interval);
-              preloader.style.opacity = '0';
-              setTimeout(() => {
-                preloader.style.display = 'none';
-                document.body.classList.remove('preloading');
-                document.querySelectorAll('.site-header, .hero-section, section, footer, .back-to-top').forEach((el) => {
-                  el.style.display = '';
-                });
-                sessionStorage.setItem('preloaderShown', 'true');
-              }, 300);
-            }
-          }, 50);
-        }
-      } else {
-        if (preloader) preloader.style.display = 'none';
-        document.body.classList.remove('preloading');
+      if (sessionStorage.getItem('preloaderShown') !== 'true' && preloader) {
+        document.body.classList.add('preloading');
         document.querySelectorAll('.site-header, .hero-section, section, footer, .back-to-top').forEach((el) => {
-          el.style.display = '';
+          el.style.display = 'none';
         });
+
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += 10;
+          if (progress >= 100) {
+            clearInterval(interval);
+            completePreloader();
+          }
+        }, 50);
+
+        // Fallback timeout to prevent infinite loading
+        setTimeout(() => {
+          if (progress < 100) {
+            console.warn('Preloader timeout reached, forcing completion.');
+            clearInterval(interval);
+            completePreloader();
+          }
+        }, PRELOADER_TIMEOUT);
+      } else {
+        completePreloader();
+      }
+    };
+
+    const completePreloader = () => {
+      if (preloader) {
+        preloader.style.opacity = '0';
+        setTimeout(() => {
+          preloader.style.display = 'none';
+          document.body.classList.remove('preloading');
+          document.querySelectorAll('.site-header, .hero-section, section, footer, .back-to-top').forEach((el) => {
+            el.style.display = '';
+          });
+          sessionStorage.setItem('preloaderShown', 'true');
+        }, 300);
       }
     };
 
@@ -71,10 +81,12 @@ document.addEventListener('DOMContentLoaded', () => {
           const preloadImg = new Image();
           preloadImg.src = img.src;
           preloadImg.onerror = () => {
-            console.warn(`Failed to preload image: ${img.src}`);
+            console.warn(`Failed to preload image: ${img.src}, using fallback.`);
             img.src = 'images/fallback.jpg';
           };
         });
+      } else {
+        console.warn('Image container not found for preloading.');
       }
     };
 
@@ -84,7 +96,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const nav = document.querySelector('.nav-container');
       const dropdowns = document.querySelectorAll('.has-dropdown');
 
-      if (!toggle || !nav) return;
+      if (!toggle || !nav) {
+        console.warn('Mobile menu toggle or nav container not found.');
+        return;
+      }
 
       toggle.addEventListener('click', () => {
         toggle.classList.toggle('active');
@@ -101,21 +116,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
       dropdowns.forEach((dropdown) => {
         const link = dropdown.querySelector('a');
-        link.addEventListener('click', (e) => {
-          if (window.innerWidth <= 768) {
-            e.preventDefault();
-            dropdown.classList.toggle('active');
-            const submenu = dropdown.querySelector('.dropdown-menu');
-            submenu.style.display = dropdown.classList.contains('active') ? 'flex' : 'none';
-          }
-        });
+        if (link) {
+          link.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768) {
+              e.preventDefault();
+              dropdown.classList.toggle('active');
+              const submenu = dropdown.querySelector('.dropdown-menu');
+              if (submenu) {
+                submenu.style.display = dropdown.classList.contains('active') ? 'flex' : 'none';
+              }
+            }
+          });
 
-        link.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' && window.innerWidth <= 768) {
-            e.preventDefault();
-            link.click();
-          }
-        });
+          link.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && window.innerWidth <= 768) {
+              e.preventDefault();
+              link.click();
+            }
+          });
+        }
       });
 
       nav.querySelectorAll('a').forEach((link) => {
@@ -134,8 +153,8 @@ document.addEventListener('DOMContentLoaded', () => {
       let lastScroll = 0;
       window.addEventListener('scroll', debounce(() => {
         const currentScroll = window.pageYOffset;
-        header.classList.toggle('scrolled', currentScroll > 50);
-        backToTop.classList.toggle('visible', currentScroll > 200);
+        if (header) header.classList.toggle('scrolled', currentScroll > 50);
+        if (backToTop) backToTop.classList.toggle('visible', currentScroll > 200);
         lastScroll = currentScroll;
       }, DEBOUNCE_DELAY));
     };
@@ -151,6 +170,8 @@ document.addEventListener('DOMContentLoaded', () => {
               top: target.offsetTop - 80,
               behavior: 'smooth'
             });
+          } else {
+            console.warn('Smooth scroll target not found.');
           }
         });
       }
@@ -441,10 +462,14 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.details-btn').forEach(button => {
       button.addEventListener('click', () => {
         const event = button.getAttribute('data-event');
-        modalTitle.textContent = event;
-        modalDetails.innerHTML = eventDetails[event].details;
-        modal.classList.add('active');
-        modal.focus();
+        if (eventDetails[event]) {
+          modalTitle.textContent = event;
+          modalDetails.innerHTML = eventDetails[event].details;
+          modal.classList.add('active');
+          modal.focus();
+        } else {
+          console.warn(`Event details not found for: ${event}`);
+        }
       });
 
       button.addEventListener('keydown', (e) => {
@@ -455,39 +480,47 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    closeModal.addEventListener('click', () => {
-      modal.classList.remove('active');
-    });
-
-    closeModal.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
+    if (closeModal) {
+      closeModal.addEventListener('click', () => {
         modal.classList.remove('active');
-      }
-    });
+      });
 
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        modal.classList.remove('active');
-      }
-    });
+      closeModal.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          modal.classList.remove('active');
+        }
+      });
+    }
 
-    modal.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        modal.classList.remove('active');
-      }
-    });
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+        }
+      });
+
+      modal.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          modal.classList.remove('active');
+        }
+      });
+    }
 
     // Gallery Modal Functionality
     document.querySelectorAll('.gallery-zoom').forEach(button => {
       button.addEventListener('click', () => {
         const galleryItem = button.closest('.gallery-item');
         const img = galleryItem.querySelector('.gallery-image');
-        galleryModalImage.src = img.src;
-        galleryModalImage.alt = img.alt;
-        galleryModalCaption.textContent = img.alt;
-        galleryModal.classList.add('active');
-        galleryModal.focus();
+        if (img) {
+          galleryModalImage.src = img.src;
+          galleryModalImage.alt = img.alt;
+          galleryModalCaption.textContent = img.alt;
+          galleryModal.classList.add('active');
+          galleryModal.focus();
+        } else {
+          console.warn('Gallery image not found.');
+        }
       });
 
       button.addEventListener('keydown', (e) => {
@@ -498,28 +531,32 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    galleryCloseModal.addEventListener('click', () => {
-      galleryModal.classList.remove('active');
-    });
-
-    galleryCloseModal.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
+    if (galleryCloseModal) {
+      galleryCloseModal.addEventListener('click', () => {
         galleryModal.classList.remove('active');
-      }
-    });
+      });
 
-    galleryModal.addEventListener('click', (e) => {
-      if (e.target === galleryModal) {
-        galleryModal.classList.remove('active');
-      }
-    });
+      galleryCloseModal.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          galleryModal.classList.remove('active');
+        }
+      });
+    }
 
-    galleryModal.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        galleryModal.classList.remove('active');
-      }
-    });
+    if (galleryModal) {
+      galleryModal.addEventListener('click', (e) => {
+        if (e.target === galleryModal) {
+          galleryModal.classList.remove('active');
+        }
+      });
+
+      galleryModal.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          galleryModal.classList.remove('active');
+        }
+      });
+    }
 
     // Testimonial Carousel
     let currentIndex = 0;
@@ -533,29 +570,33 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    prevButton.addEventListener('click', () => {
-      currentIndex = (currentIndex === 0) ? testimonialCards.length - 1 : currentIndex - 1;
-      showTestimonial(currentIndex);
-    });
+    if (prevButton) {
+      prevButton.addEventListener('click', () => {
+        currentIndex = (currentIndex === 0) ? testimonialCards.length - 1 : currentIndex - 1;
+        showTestimonial(currentIndex);
+      });
 
-    nextButton.addEventListener('click', () => {
-      currentIndex = (currentIndex === testimonialCards.length - 1) ? 0 : currentIndex + 1;
-      showTestimonial(currentIndex);
-    });
+      prevButton.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          prevButton.click();
+        }
+      });
+    }
 
-    prevButton.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        prevButton.click();
-      }
-    });
+    if (nextButton) {
+      nextButton.addEventListener('click', () => {
+        currentIndex = (currentIndex === testimonialCards.length - 1) ? 0 : currentIndex + 1;
+        showTestimonial(currentIndex);
+      });
 
-    nextButton.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        nextButton.click();
-      }
-    });
+      nextButton.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          nextButton.click();
+        }
+      });
+    }
 
     // Auto-advance carousel
     setInterval(() => {
@@ -570,7 +611,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (entry.isIntersecting) {
           setTimeout(() => {
             entry.target.classList.add('visible');
-          }, index * 100); // Staggered animation for brochure events
+          }, index * 100);
         }
       });
     }, { threshold: 0.2 });
@@ -578,13 +619,18 @@ document.addEventListener('DOMContentLoaded', () => {
     animatedElements.forEach(element => observer.observe(element));
 
     // Initialize
-    initPreloader();
-    preloadImages(document.querySelector('.gallery-section'));
-    preloadImages(document.querySelector('.brochure-section'));
-    initMobileMenu();
-    initHeaderScroll();
-    initSmoothScroll();
-    initBackToTop();
+    try {
+      initPreloader();
+      preloadImages(document.querySelector('.gallery-section'));
+      preloadImages(document.querySelector('.brochure-section'));
+      initMobileMenu();
+      initHeaderScroll();
+      initSmoothScroll();
+      initBackToTop();
+    } catch (error) {
+      console.error('Initialization error:', error);
+      completePreloader(); // Ensure preloader completes on error
+    }
 });
 
 // Handle no-scroll class
