@@ -305,70 +305,82 @@
   color: #333;
 }
 
-/* Christmas Packages Section */
-.packages-section {
+/* Brochure Section */
+.brochure-section {
   padding: 60px 20px;
   text-align: center;
+  background-color: #f8f8f8;
 }
 
-.packages-container {
-  max-width: 1200px;
+.brochure-container {
+  max-width: 800px;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 30px;
 }
 
-.package-card {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  transition: transform 0.3s;
-  display: flex;
-  flex-direction: column;
-}
-
-.package-card:hover {
-  transform: translateY(-10px);
-}
-
-.package-card img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 15px;
-}
-
-.package-card h3 {
+.brochure-container h3 {
   font-family: 'Playfair Display', serif;
   color: var(--primary-color);
+  font-size: 1.8rem;
+  margin: 20px 0 10px;
+}
+
+.brochure-container h4 {
+  font-family: 'Montserrat', sans-serif;
+  color: var(--primary-color);
+  font-size: 1.4rem;
+  margin: 15px 0 10px;
+}
+
+.brochure-container p {
+  font-family: 'Lora', serif;
+  font-size: 1rem;
+  color: var(--dark-color);
+  line-height: 1.6;
   margin-bottom: 15px;
 }
 
-.package-card p {
-  font-family: 'Lora', serif;
-  margin-bottom: 20px;
+.brochure-container ul {
+  list-style: disc;
+  padding-left: 20px;
+  margin-bottom: 15px;
+  text-align: left;
 }
 
-.package-card .download-btn {
+.brochure-container ul li {
+  font-family: 'Lora', serif;
+  font-size: 1rem;
+  color: var(--dark-color);
+  margin-bottom: 10px;
+}
+
+.brochure-menu {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Lora', serif;
+  background: #fff;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.brochure-menu th, .brochure-menu td {
+  padding: 10px;
+  border: 1px solid #f0e4ea;
+  text-align: left;
+}
+
+.brochure-menu th {
   background: var(--primary-color);
   color: #fff;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
   font-family: 'Montserrat', sans-serif;
-  text-decoration: none;
-  transition: background 0.3s, transform 0.2s;
-  margin-top: auto;
-  align-self: center;
 }
 
-.package-card .download-btn:hover {
-  background: var(--accent-color);
-  transform: scale(1.05);
+.brochure-container a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.brochure-container a:hover {
+  text-decoration: underline;
 }
 
 /* Testimonials Section */
@@ -514,17 +526,6 @@
   margin-bottom: 20px;
 }
 
-.cta-container .btn-primary {
-  padding: 12px 30px;
-  font-size: 1.1rem;
-  margin: 10px;
-  transition: transform 0.3s;
-}
-
-.cta-container .btn-primary:hover {
-  transform: scale(1.1);
-}
-
 .cta-section a {
   color: #fff;
   text-decoration: none;
@@ -570,12 +571,8 @@
     grid-template-columns: 1fr;
   }
 
-  .packages-section {
+  .brochure-section {
     padding: 40px 15px;
-  }
-
-  .packages-container {
-    grid-template-columns: 1fr;
   }
 
   .testimonials-section {
@@ -594,10 +591,5 @@
 
   .gallery-modal-content img {
     max-height: 50vh;
-  }
-
-  .cta-container .btn-primary {
-    padding: 10px 20px;
-    font-size: 1rem;
   }
 }
