@@ -612,4 +612,25 @@
   .gallery-modal-content img {
     max-height: 50vh;
   }
+} .view-more-container {
+  margin-top: 30px;
+  text-align: center;
+  margin-left: 500px;
+ width: 200px;
+}
+
+.view-more-container .btn-primary {
+  display: inline-block;
+  padding: 12px 30px;
+  font-size: 1.1rem;
+  background: var(--primary-color);
+  color: #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.view-more-container .btn-primary:hover {
+  background: var(--accent-color);
+  transform: scale(1.05);
 }
